@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Fingerprint Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f1320;
+      --card: #151a2b;
+      --muted: #aab3c5;
+      --text: #e8ecf3;
+      --accent: #7aa2ff;
+      --good: #2fbf71;
+      --warn: #ffb020;
+      --bad: #ff5c5c;
+      --chip: #1b2240;
+      --border: #27314f;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 10% -10%, #1b2344 0%, #0f1320 40%), var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    header {
+      padding: 28px 22px 0;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px 22px 60px;
+    }
+
+    .title {
+      font-size: clamp(24px, 2.2vw, 30px);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 0 0 8px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin: 0 0 18px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 14px 0 26px;
+    }
+
+    button,
+    .chip {
+      background: var(--chip);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      grid-column: span 12;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.0)), var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    @media (min-width: 820px) {
+      .span-6 {
+        grid-column: span 6;
+      }
+
+      .span-4 {
+        grid-column: span 4;
+      }
+    }
+
+    .card h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      letter-spacing: .2px;
+      color: #cfd8ff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .kvs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .kv {
+      background: #0f152b;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-height: 64px;
+    }
+
+    .kv small {
+      color: var(--muted);
+    }
+
+    .kv .val {
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    .list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .badge {
+      padding: 8px 11px;
+      background: #0f152b;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: #d8def5;
+      font-size: 13px;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      border: 1px solid var(--border);
+      background: #101737;
+    }
+
+    .pill.good {
+      border-color: rgba(47, 191, 113, .4);
+    }
+
+    .pill.warn {
+      border-color: rgba(255, 176, 32, .4);
+    }
+
+    .pill.bad {
+      border-color: rgba(255, 92, 92, .5);
+      background: #221419;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .codebox {
+      background: #0b1024;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      overflow: auto;
+      max-height: 320px;
+    }
+
+    .section-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .callout {
+      border: 1px solid var(--border);
+      background: #131a36;
+      padding: 10px 12px;
+      border-radius: 12px;
+      margin: 6px 0 0;
+    }
+
+    .danger {
+      border-color: rgba(255, 92, 92, .6);
+      background: #221419;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="wrap">
+    <h1 class="title">🔎 Fingerprint Dashboard</h1>
+    <p class="subtitle">See exactly what your browser exposes. Everything is processed locally in your browser — nothing
+      is sent anywhere.</p>
+    <div class="actions">
+      <button id="refreshBtn">Run Fingerprint Again</button>
+      <button id="copyBtn">Copy JSON</button>
+      <button id="saveBtn">Download JSON</button>
+      <span id="riskBadge" class="pill">Risk: <strong class="mono" id="riskText">—</strong></span>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="grid">
+      <section class="card span-6" id="browserCard">
+        <h3>🌐 Browser & System</h3>
+        <div class="kvs" id="browserKvs"></div>
+      </section>
+
+      <section class="card span-6" id="screenCard">
+        <h3>🖥️ Screen & Display</h3>
+        <div class="kvs" id="screenKvs"></div>
+      </section>
+
+      <section class="card span-6" id="localeCard">
+        <h3>🌍 Locale & Storage</h3>
+        <div class="kvs" id="localeKvs"></div>
+      </section>
+
+      <section class="card span-6" id="graphicsCard">
+        <h3>🎨 Graphics Fingerprints</h3>
+        <div class="kvs" id="graphicsKvs"></div>
+        <div class="hint callout">Canvas/WebGL hashes are identifiers produced from drawing operations. Blocking or
+          randomizing them reduces tracking.</div>
+      </section>
+
+      <section class="card span-6" id="networkCard">
+        <h3>📡 Network</h3>
+        <div class="kvs" id="networkKvs"></div>
+        <div id="ipWarning"></div>
+      </section>
+
+      <section class="card span-6" id="hardwareCard">
+        <h3>🔋 Hardware & Sensors</h3>
+        <div class="kvs" id="hardwareKvs"></div>
+      </section>
+
+      <section class="card span-6" id="pluginsCard">
+        <h3>🔌 Plugins</h3>
+        <div class="list" id="pluginsList"></div>
+      </section>
+
+      <section class="card span-6" id="fontsCard">
+        <h3>🔠 Fonts</h3>
+        <div class="list" id="fontsList"></div>
+        <div class="hint callout">Exposed fonts can uniquely identify a system. Some privacy browsers standardize the
+          font list.</div>
+      </section>
+
+      <section class="card span-12" id="rawCard">
+        <h3>📦 Raw JSON</h3>
+        <pre class="codebox mono" id="rawOut">{}</pre>
+        <div class="section-actions">
+          <span class="hint">Tip: use the buttons above to copy or download this snapshot.</span>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { Ui } from './user.js';
+
+    const el = (id) => document.getElementById(id);
+    const kv = (label, value) => {
+      const div = document.createElement('div');
+      div.className = 'kv';
+      const k = document.createElement('small');
+      k.textContent = label;
+      const v = document.createElement('div');
+      v.className = 'val mono';
+      v.textContent = (value ?? '—').toString();
+      div.append(k, v);
+      return div;
+    };
+    const badge = (text) => {
+      const b = document.createElement('span');
+      b.className = 'badge mono';
+      b.textContent = text;
+      return b;
+    };
+    const setRisk = (score) => {
+      const riskText = el('riskText');
+      const pill = el('riskBadge');
+      let label = 'Low', cls = 'pill good';
+      if (score >= 6) { label = 'High'; cls = 'pill bad'; }
+      else if (score >= 3) { label = 'Medium'; cls = 'pill warn'; }
+      riskText.textContent = label;
+      pill.className = cls + ' pill';
+    };
+
+    // Heuristic risk score (0–8). Tweak as you like.
+    const computeRisk = (d) => {
+      let s = 0;
+      if (d.publicIP) s += 3;               // public IP shown
+      if (d.privateIP && typeof d.privateIP === 'string' && !d.privateIP.endsWith('.local')) s += 2;
+      if (d.isCanvas) s += 1;               // canvas exposed
+      if (d.webGLCapture) s += 1;           // webgl hash present
+      if (Array.isArray(d.plugins) && d.plugins.length > 0) s += 1;
+      if (Array.isArray(d.fontuserDeviceData) && d.fontuserDeviceData.length > 10) s += 1;
+      return s;
+    };
+
+    const render = (data) => {
+      // Browser & System
+      const browser = el('browserKvs');
+      browser.innerHTML = '';
+      browser.append(
+        kv('Browser', `${data.browser || '—'} (${data.engine || '—'})`),
+        kv('Version (UA)', data.useragent),
+        kv('OS', `${data.os || '—'} ${data.osVersion || ''}`.trim()),
+        kv('Device', data.device),
+        kv('CPU Arch', data.getCpu || data.architecture || '—'),
+        kv('Platform', data.platform),
+        kv('Cores', data.hardwareConcurrency),
+        kv('RAM (GB)', data.memory)
+      );
+
+      // Screen & Display
+      const screen = el('screenKvs');
+      screen.innerHTML = '';
+      const screenAttrs = data.screenAttributes || {};
+      screen.append(
+        kv('Resolution', data.getCurrentResolution || `${screenAttrs.width || '—'}x${screenAttrs.height || '—'}`),
+        kv('Avail. Resolution', data.getAvailableResolution || '—'),
+        kv('Color Depth', data.getColorDepth ?? screenAttrs.colorDepth ?? '—'),
+        kv('Pixel Ratio', screenAttrs.pixelRatio ?? '—'),
+        kv('DPI X', data.getDeviceXDPI),
+        kv('DPI Y', data.getDeviceYDPI)
+      );
+
+      // Locale & Storage
+      const locale = el('localeKvs');
+      locale.innerHTML = '';
+      locale.append(
+        kv('Language', data.getLanguage || data.language),
+        kv('System Language', data.getSystemLanguage || '—'),
+        kv('Timezone', data.getTimeZone || '—'),
+        kv('Cookies', data.isCookie ? 'enabled' : 'disabled'),
+        kv('LocalStorage', data.isLocalStorage ? 'available' : 'blocked'),
+        kv('SessionStorage', data.isSessionStorage ? 'available' : 'blocked')
+      );
+
+      // Graphics
+      const gfx = el('graphicsKvs');
+      gfx.innerHTML = '';
+      gfx.append(
+        kv('Canvas Hash', data.canvasCapture || data.getCanvasPrint || '—'),
+        kv('WebGL Hash', data.webGLCapture || '—')
+      );
+
+      // Network
+      const net = el('networkKvs');
+      net.innerHTML = '';
+      const ni = data.networkInfo || {};
+      net.append(
+        kv('Private IP (WebRTC)', data.privateIP || '—'),
+        kv('Public IP', data.publicIP || '—'),
+        kv('Effective Type', ni.effectiveType ?? '—'),
+        kv('Downlink (Mbps)', ni.downlink ?? '—'),
+        kv('RTT (ms)', ni.rtt ?? '—'),
+        kv('Save-Data', ni.saveData ? 'on' : 'off'),
+        kv('HTTP/2 Support', data.http2Support ? 'yes' : 'no')
+      );
+
+      const ipWarn = el('ipWarning');
+      ipWarn.innerHTML = '';
+      if (data.publicIP) {
+        const w = document.createElement('div');
+        w.className = 'callout danger';
+        w.innerHTML = '⚠️ <strong>Public IP exposed.</strong> Disable WebRTC leaks or use a privacy-hardened browser to reduce tracking.';
+        ipWarn.appendChild(w);
+      }
+
+      // Hardware & Sensors
+      const hw = el('hardwareKvs');
+      hw.innerHTML = '';
+      const bat = data.batteryInfo || {};
+      hw.append(
+        kv('Battery', (bat.level != null ? `${bat.level}%` : '—') + (bat.charging ? ' (charging)' : '')),
+        kv('Touchscreen', data.touchscreenSupport ? 'yes' : 'no'),
+        kv('Bluetooth', data.bluetoothSupport ? 'yes' : 'no'),
+        kv('VR/AR', data.vrarSupport ? 'yes' : 'no'),
+        kv('Speech Recognition', data.speechRecognitionSupported ? 'yes' : 'no'),
+        kv('Mouse (last)', data.mousePointerCoordinates ? `${data.mousePointerCoordinates.x}, ${data.mousePointerCoordinates.y}` : '—'),
+        kv('Keyboard Lang', (data.keyboardLayoutInfo && data.keyboardLayoutInfo.language) || '—')
+      );
+
+      // Plugins
+      const plugins = el('pluginsList');
+      plugins.innerHTML = '';
+      if (Array.isArray(data.plugins) && data.plugins.length) {
+        data.plugins.forEach(p => plugins.appendChild(badge(`${p.name} · sha:${(p.sha || '').slice(0, 8)}…`)));
+      } else {
+        plugins.appendChild(badge('No plugins reported'));
+      }
+
+      // Fonts
+      const fonts = el('fontsList');
+      fonts.innerHTML = '';
+      const fontList = Array.isArray(data.fontuserDeviceData) ? data.fontuserDeviceData
+        : (typeof data.getFonts === 'string' ? data.getFonts.split(',').map(s => s.trim()) : []);
+      if (fontList.length) {
+        fontList.slice(0, 80).forEach(f => fonts.appendChild(badge(f)));
+        if (fontList.length > 80) fonts.appendChild(badge(`+${fontList.length - 80} more`));
+      } else {
+        fonts.appendChild(badge('No fonts detected'));
+      }
+
+      // Raw JSON
+      el('rawOut').textContent = JSON.stringify(data, null, 2);
+
+      // Risk
+      setRisk(computeRisk(data));
+    };
+
+    const run = async () => {
+      try {
+        const data = await Ui();  // call your fingerprint collector
+        render(data);
+        window.__fpSnapshot = data; // stash for copy/save
+      } catch (e) {
+        console.error(e);
+        alert('Error running fingerprint script. Check console for details.');
+      }
+    };
+
+    // Actions
+    el('refreshBtn').addEventListener('click', run);
+    el('copyBtn').addEventListener('click', async () => {
+      const txt = JSON.stringify(window.__fpSnapshot ?? {}, null, 2);
+      try {
+        await navigator.clipboard.writeText(txt);
+        el('copyBtn').textContent = 'Copied!';
+        setTimeout(() => el('copyBtn').textContent = 'Copy JSON', 1200);
+      } catch {
+        // Fallback
+        const ta = document.createElement('textarea');
+        ta.value = txt; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); ta.remove();
+      }
+    });
+    el('saveBtn').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(window.__fpSnapshot ?? {}, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `fingerprint-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    });
+
+    // Initial run
+    run();
+  </script>
+</body>
+
+</html>
